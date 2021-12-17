@@ -1,0 +1,20 @@
+format version: 10
+
+pipelines:
+  pipe1:
+    group: docker-images
+    materials:
+      gitrepo:  # this is the name of material
+        # says about type of material and url at once
+        git: https://github.com/anitamiovska/ui-automation.git
+        branch: main
+    stages:
+      - build: 
+          jobs:
+            build: 
+              tasks:
+               - exec: 
+                   command: bash
+                   arguments:
+                   - c 
+                   - docker build -t ubuntu-jdk-mvn . -f Dockerfile
