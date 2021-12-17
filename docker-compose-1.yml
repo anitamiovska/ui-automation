@@ -1,0 +1,62 @@
+version: "3"
+services:
+  chrome:
+    image: selenium/node-chrome:4.1.0-20211209
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - JAVA_OPTS=-Dwebdriver.chrome.whitelistedIps=
+    networks:
+      - test-automation-setup
+
+  firefox:
+    image: selenium/node-firefox:4.1.0-20211209
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      - test-automation-setup
+
+  selenium-hub:
+    image: selenium/hub:4.1.0-20211209
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    networks:
+      - test-automation-setup
+
+  mvn-tests:
+    build:
+      context: ./
+      dockerfile: Dockerfile-mvn
+    networks:
+      - test-automation-setup
+    depends_on:
+      - selenium-hub
+      - firefox
+      - chrome
+    volumes:
+      - $PWD/test-results:/docker/test-results
+    command: >
+      bash -c "
+      sleep 25s
+      && mvn clean test -Dbrowser=chrome -DgridURL=selenium-hub:4444
+      && mvn io.qameta.allure:allure-maven:report
+      && rm -rf test-results/* 
+      && cp -r target/site/allure-maven-plugin test-results
+      "
+
+
+networks:
+  test-automation-setup:
+      external: true

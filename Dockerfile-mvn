@@ -1,0 +1,10 @@
+FROM ubuntu-jdk-mvn:latest
+
+RUN mkdir docker
+COPY . ./docker/
+COPY --from=ubuntu-jdk-mvn / /docker/
+
+WORKDIR /docker/
+
+RUN mvn dependency:resolve
+RUN mvn clean install -DskipTests
