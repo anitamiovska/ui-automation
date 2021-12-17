@@ -1,9 +1,18 @@
 pipeline {
     agent any
+    triggers {
+        pollSCM('*/1 * * * *')
+    }
     stages { 
-        stage('build') {
+        stage('Build-base') {
             steps {
                 sh "docker build -t ubuntu-jdk-mvn . -f Dockerfile"
+            }
+        }
+        stage('Build-mvn-tests') {
+            steps {
+                sh "docker build -t anitamio/mvn_tests:latest . -f Dockerfile_tests"
+                sh "docker push anitamio/mvn_tests:latest"
             }
         }
     }
