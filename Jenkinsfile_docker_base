@@ -3,6 +3,9 @@ pipeline {
     triggers {
         pollSCM('*/1 * * * *')
     }
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials("anitamio-dockerhub")
+    }
     stages { 
         stage('Build-base') {
             steps {
@@ -12,9 +15,20 @@ pipeline {
         stage('Build-mvn-tests') {
             steps {
                 sh "docker build -t anitamio/mvn_tests:latest . -f Dockerfile-mvn"
+            }
+        
+
+        stage('Login') {
+            steps {
+                sh "docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+            }
+        }
+        stage('push') {
+            steps {
                 sh "docker push anitamio/mvn_tests:latest"
             }
         }
+        
     }
 }
 
