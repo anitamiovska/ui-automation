@@ -28,7 +28,6 @@ pipeline {
                 sh "docker push anitamio/mvn_tests:latest"
             }
         }
-        
     }
 }
 
