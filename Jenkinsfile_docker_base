@@ -22,7 +22,7 @@ pipeline {
 
         stage('Login') {
             steps {
-                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub') {
+                docker.withRegistry('https://hub.docker.com/', 'anitamio') {
                     sh "docker push anitamio/mvn_tests:latest"
                 }
             }
