@@ -1,0 +1,142 @@
+pipeline {
+    agent any
+    stages { 
+        stage('build') {
+            steps {
+                echo "Building node application"
+            }
+        }
+        stage('set-up-selenium-env') {
+            steps {
+                script {
+                    setUpSeleniumProcesses()
+                }
+            }
+        }
+        stage('deploy-stage') {
+            steps {
+                script {
+                    deployAndSendNotification("stage")
+                }
+            }
+        }
+        stage('test-stage') {
+            parallel {
+                stage('test-stage-chrome') {
+                    steps {
+                        script {
+                            runTestsAndGetReport("stage-chrome")
+                        }
+                    }
+                }
+                stage('test-stage-firefox') {
+                    steps {
+                        script {
+                            runTestsAndGetReport("stage-firefox")
+                        }
+                    }
+                }
+            }
+        }
+        stage('deploy-prod') {
+            steps {
+                script {
+                    deployAndSendNotification("prod")
+                }
+            }
+        }
+        stage('test-prod') {
+            parallel {
+                stage('test-prod-chrome') {
+                    steps {
+                        script {
+                            runTestsAndGetReport("prod-chrome")
+                        }
+                    }
+                }
+                stage('test-prod-firefox') {
+                    steps {
+                        script {
+                            runTestsAndGetReport("prod-firefox")
+                        }
+                    }
+                }
+            }
+        }
+        stage('stop-selenium-env') {
+            steps {
+                script {
+                    stopSeleniumProcesses()
+                }
+            }
+        }
+    }
+}
+
+def sendNotification(String environment, String status) {
+    if (status == "success") {
+        sh "bash send_notification.sh ${environment} 0"
+    } else {
+        sh "bash send_notification.sh ${environment} 1"
+    }
+}
+def deploy(String environment) {
+    echo "Deployment to ${environment} triggered.."
+}
+
+def deployAndSendNotification(String environment) {
+    try {
+        deploy(environment)
+    } catch (error) {
+        sendNotification("${environment}-deployment", "failure")
+        error("Deployment to ${environment} failed")
+    } finally {
+        sendNotification("${environment}-deployment", "success")
+    }
+}
+
+def test(String environment) {
+    echo "Running tests on ${environment}.."
+    sh "docker pull anitamio/mvn_tests:latest"
+}
+
+def setUpSeleniumProcesses () {
+    sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
+    sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
+    sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
+}
+
+def stopSeleniumProcesses() {
+    sh "docker rm -f selenium-hub"
+    sh "docker rm -f chrome"
+    sh "docker rm -f firefox"
+}
+
+def runTestsAndGetReport(String testingEnv) {
+    test(testingEnv)
+    try {
+        sh "docker run -d -t --network=test-automation-setup --name mvn-tests-${testingEnv} anitamio/mvn_tests:latest"
+        sh "docker exec mvn-tests-${testingEnv} mvn clean test -Dbrowser=chrome -DgridURL=selenium-hub:4444"
+        sh "docker exec mvn-tests-${testingEnv} mvn io.qameta.allure:allure-maven:report"
+        sh "docker exec mvn-tests-${testingEnv} rm -rf test-results/*"
+        sh "docker exec mvn-tests-${testingEnv} cp -R target/site/allure-maven-plugin test-results"
+    } catch (error) {
+        sendNotification("testing-${testingEnv}", "failure")
+        error("Testing on ${testingEnv} environment failed")
+    } finally {
+        sendNotification("testing-${testingEnv}", "success")
+        sh "docker cp mvn-tests-${testingEnv}:/docker/test-outputresults/allure-maven-plugin/index.html report-${testingEnv}.html"
+        sh "docker rm -f mvn-tests-${testingEnv}"
+        publishHTML(
+            [
+                allowMissing: false, 
+                alwaysLinkToLastBuild: false,
+                keepAll: false, 
+                reportDir: '', 
+                reportFiles: "report-${testingEnv}.html", 
+                reportName: "Test report for ${testingEnv}",
+                reportTitles: ''
+            ]
+        )
+    }
+}
