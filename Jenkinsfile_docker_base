@@ -3,6 +3,12 @@ pipeline {
     triggers {
         pollSCM('*/1 * * * *')
     }
+    environment {
+        registry = "anitamio/mvn_tests"
+        registryCredential = "bde53ee1-57da-472b-a93a-e408b504bb46"
+        dockerImage = ''
+    }
+    agent any
     stages { 
         stage('Build-base') {
             steps {
@@ -11,18 +17,21 @@ pipeline {
         }
 
         stage('Build-mvn-tests') {
-            steps {
-                sh "docker build -t anitamio/mvn_tests:latest . -f Dockerfile-mvn"
-            }
+            steps { script {
+                dockerImage = docker.build registry + ":latest"
+             } }
         
         }
 
         stage('Login') {
             steps {
-                withDockerRegistry(credentialsId: 'bde53ee1-57da-472b-a93a-e408b504bb46', url: 'https://hub.docker.com/v2/') {
-                    sh "docker push anitamio/mvn_tests:latest"
+                script {
+                    docker.withRegistry( '', registryCredential ) { {
+                         dockerImage.push()
                 }
             }
         }
+    }
+}
     }
 }
