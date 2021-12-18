@@ -19,7 +19,7 @@ pipeline {
 
         stage('Login') {
             steps {
-                withDockerRegistry(credentialsId: 'bde53ee1-57da-472b-a93a-e408b504bb46', url: 'https://registry.hub.docker.com') { {
+                withDockerRegistry(credentialsId: 'bde53ee1-57da-472b-a93a-e408b504bb46', url: 'https://registry.hub.docker.com') {
                     sh "docker push anitamio/mvn_tests:latest"
                 }
             }
