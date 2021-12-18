@@ -11,7 +11,7 @@ pipeline {
         }
         stage('Build-mvn-tests') {
             steps {
-                sh "docker build -t anitamiogit/mvn_tests:latest . -f Dockerfile_tests"
+                sh "docker build -t anitamiogit/mvn_tests:latest . -f Dockerfile-mvn"
                 sh "docker push anitamio/mvn_tests:latest"
             }
         }
