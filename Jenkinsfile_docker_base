@@ -19,7 +19,7 @@ pipeline {
 
         stage('Login') {
             steps {
-                docker.withRegistry('hhttps://registry.hub.docker.com', 'docker-hub') {
+                withDockerRegistry([ credentialsId: "anitamio-dockerhub", url: "" ]) { {
                     sh "docker push anitamio/mvn_tests:latest"
                 }
             }
