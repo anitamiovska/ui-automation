@@ -22,12 +22,9 @@ pipeline {
 
         stage('Login') {
             steps {
-                sh "docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-            }
-        }
-        stage('push') {
-            steps {
-                sh "docker push anitamio/mvn_tests:latest"
+                withDockerRegistry([ credentialsId: "anitamio-dockerhub", url: "https://hub.docker.com/repository/docker/anitamio/mvn_tests" ]) {
+                    sh "docker push anitamio/mvn_tests:latest"
+                }
             }
         }
     }
