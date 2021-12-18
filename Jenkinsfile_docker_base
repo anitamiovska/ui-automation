@@ -8,7 +8,6 @@ pipeline {
         registryCredential = "bde53ee1-57da-472b-a93a-e408b504bb46"
         dockerImage = ''
     }
-    agent any
     stages { 
         stage('Build-base') {
             steps {
