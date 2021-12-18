@@ -3,9 +3,6 @@ pipeline {
     triggers {
         pollSCM('*/1 * * * *')
     }
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials("anitamio-dockerhub")
-    }
     stages { 
         stage('Build-base') {
             steps {
