@@ -66,11 +66,11 @@ pipeline {
                 }
             }
         }
-        stage('stop-selenium-env') {
-            steps {
-                script {
-                    stopProcess()
-                }
+    }
+    post {
+        always {
+            script {
+                stopSeleniumProcesses()
             }
         }
     }
