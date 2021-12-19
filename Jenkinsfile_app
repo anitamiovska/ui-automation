@@ -10,17 +10,11 @@ pipeline {
         stage('set-up-selenium-env') {
             steps {
                 script {
-                    skipRemainingStages = true
                     startProcess()
                 }
             }
         }
         stage('deploy-stage') {
-            when {
-                expression {
-                    !skipRemainingStages
-                }
-            }
             steps {
                 script {
                     deployAndSendNotification("stage")
@@ -28,15 +22,12 @@ pipeline {
             }
         }
         stage('test-stage') {
-            when {
-                expression {
-                    !skipRemainingStages
-                }
             }
             parallel {
                 stage('test-stage-chrome') {
                     steps {
                         script {
+                            skipRemainingStages = true
                             runTestsAndGetReport("stage-chrome")
                         }
                     }
