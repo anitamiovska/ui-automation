@@ -31,7 +31,7 @@ pipeline {
                     }
                 }
             
-                stage('test-firefox') {
+                stage('test_firefox') {
                     steps {
                         script {
                             runTestsAndGetReport("test-firefox")
@@ -67,10 +67,10 @@ pipeline {
             }
         }
 
-        stage('stop-selenium-env') {
+        stage('stop_selenium_env') {
             steps {
                 script {
-                    stopSeleniumProcesses()
+                    stopProcess()
                 }
             }
         }
