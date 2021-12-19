@@ -14,16 +14,23 @@ pipeline {
                 }
             }
         }
-        stage('deploy') {
+        stage('deploy_stage') {
             steps {
                 script {
                     deployAndSendNotification("stage")
                 }
             }
         }
-        stage('test') {
+        stage('deploy_prod') {
+            steps {
+                script {
+                    deployAndSendNotification("prod")
+                }
+            }
+        }
+        stage('test_stage') {
             parallel {
-                stage('test_chrome') {
+                stage('test_chrome_stage') {
                     steps {
                         script {
                             runTestsAndGetReport("test_chrome")
@@ -31,7 +38,7 @@ pipeline {
                     }
                 }
             
-                stage('test_firefox') {
+                stage('test_firefox_stage') {
                     steps {
                         script {
                             runTestsAndGetReport("test-firefox")
@@ -41,13 +48,6 @@ pipeline {
             }
         } 
         
-        stage('deploy_prod') {
-            steps {
-                script {
-                    deployAndSendNotification("prod")
-                }
-            }
-        }
         stage('test_prod') {
             parallel {
                 stage('test_prod_chrome') {
