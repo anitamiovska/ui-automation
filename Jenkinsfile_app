@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    def skipRemainingStages = false
     stages { 
         stage('build') {
             steps {
@@ -9,11 +10,16 @@ pipeline {
         stage('set-up-selenium-env') {
             steps {
                 script {
-                    setUpSeleniumProcesses()
+                    skipRemainingStages = true
+                    startProcess()
                 }
             }
         }
         stage('deploy-stage') {
+            when {
+                expression {
+                    !skipRemainingStages
+                }
             steps {
                 script {
                     deployAndSendNotification("stage")
@@ -21,6 +27,10 @@ pipeline {
             }
         }
         stage('test-stage') {
+            when {
+                expression {
+                    !skipRemainingStages
+                }
             parallel {
                 stage('test-stage-chrome') {
                     steps {
@@ -46,6 +56,11 @@ pipeline {
             }
         }
         stage('test-prod') {
+            when {
+                expression {
+                    !skipRemainingStages
+                }
+            }
             parallel {
                 stage('test-prod-chrome') {
                     steps {
@@ -66,11 +81,17 @@ pipeline {
         stage('stop-selenium-env') {
             steps {
                 script {
-                    stopSeleniumProcesses()
+                    stopProcess()
                 }
             }
         }
     }
+}
+
+def startProcess () {
+    sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
+    sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
+    sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
 }
 
 def sendNotification(String environment, String status) {
@@ -100,13 +121,7 @@ def test(String environment) {
     sh "docker pull anitamio/mvn_tests:latest"
 }
 
-def setUpSeleniumProcesses () {
-    sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
-    sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
-    sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
-}
-
-def stopSeleniumProcesses() {
+def stopProcess() {
     sh "docker rm -f selenium-hub"
     sh "docker rm -f chrome"
     sh "docker rm -f firefox"
@@ -125,7 +140,7 @@ def runTestsAndGetReport(String testingEnv) {
         error("Testing on ${testingEnv} environment failed")
     } finally {
         sendNotification("testing-${testingEnv}", "success")
-        sh "docker cp mvn-tests-${testingEnv}:/docker/test-outputresults/allure-maven-plugin/index.html report-${testingEnv}.html"
+        sh "docker cp mvn-tests-${testingEnv}:/docker/test-results/allure-maven-plugin/index.html report-${testingEnv}.html"
         sh "docker rm -f mvn-tests-${testingEnv}"
         publishHTML(
             [
