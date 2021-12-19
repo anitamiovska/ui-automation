@@ -4,63 +4,63 @@ pipeline {
     stages { 
         stage('build') {
             steps {
-                echo "Building node application"
+                echo "Application build"
             }
         }
-        stage('set-up-selenium-env') {
+        stage('env_setup') {
             steps {
                 script {
                     startProcess()
                 }
             }
         }
-        stage('deploy-stage') {
+        stage('deploy') {
             steps {
                 script {
                     deployAndSendNotification("stage")
                 }
             }
         }
-        stage('test-stage') {
+        stage('test') {
             parallel {
-                stage('test-stage-chrome') {
+                stage('test_chrome') {
                     steps {
                         script {
-                            runTestsAndGetReport("stage-chrome")
+                            runTestsAndGetReport("test_chrome")
                         }
                     }
                 }
             
-                stage('test-stage-firefox') {
+                stage('test-firefox') {
                     steps {
                         script {
-                            runTestsAndGetReport("stage-firefox")
+                            runTestsAndGetReport("test-firefox")
                         }
                     }
                 }
             }
         } 
         
-        stage('deploy-prod') {
+        stage('deploy_prod') {
             steps {
                 script {
                     deployAndSendNotification("prod")
                 }
             }
         }
-        stage('test-prod') {
+        stage('test_prod') {
             parallel {
-                stage('test-prod-chrome') {
+                stage('test_prod_chrome') {
                     steps {
                         script {
-                            runTestsAndGetReport("prod-chrome")
+                            runTestsAndGetReport("prod_chrome")
                         }
                     }
                 }
-                stage('test-prod-firefox') {
+                stage('test_prod_firefox') {
                     steps {
                         script {
-                            runTestsAndGetReport("prod-firefox")
+                            runTestsAndGetReport("prod_firefox")
                         }
                     }
                 }

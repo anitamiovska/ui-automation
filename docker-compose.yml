@@ -31,6 +31,7 @@ services:
     environment:
       - HUB_HOST=selenium-hub
       - HUB_PORT=4444
+      - JAVA_OPTS=-Dwebdriver.firefox.whitelistedIps=
     networks: 
       - test-automation-setup
 
