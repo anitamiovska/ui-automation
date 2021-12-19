@@ -22,11 +22,6 @@ pipeline {
             }
         }
         stage('test-stage') {
-            steps {
-                script {
-                    skipRemainingStages = true
-                }
-            }
             parallel {
                 stage('test-stage-chrome') {
                     steps {
@@ -54,11 +49,6 @@ pipeline {
             }
         }
         stage('test-prod') {
-            when {
-                expression {
-                    !skipRemainingStages
-                }
-            }
             parallel {
                 stage('test-prod-chrome') {
                     steps {
@@ -86,7 +76,6 @@ pipeline {
     }
 }
 
-def skipRemainingStages = false
 
 def startProcess () {
     sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
