@@ -22,7 +22,6 @@ pipeline {
             }
         }
         stage('test-stage') {
-            }
             parallel {
                 stage('test-stage-chrome') {
                     steps {
@@ -32,15 +31,18 @@ pipeline {
                         }
                     }
                 }
+            
                 stage('test-stage-firefox') {
                     steps {
                         script {
+                            skipRemainingStages = true
                             runTestsAndGetReport("stage-firefox")
                         }
                     }
                 }
             }
-        }
+        } 
+        
         stage('deploy-prod') {
             steps {
                 script {
