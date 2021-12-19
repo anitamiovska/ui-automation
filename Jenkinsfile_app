@@ -7,11 +7,11 @@ pipeline {
                 echo "Application build"
             }
         }
-        stage('env_setup') {
+        stage('run_selenium_hub') {
             steps {
-                script {
-                    startProcess()
-                }
+                sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
+                sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
+                sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
             }
         }
         stage('deploy_stage') {
@@ -69,20 +69,15 @@ pipeline {
 
         stage('stop_selenium_env') {
             steps {
-                script {
-                    stopProcess()
-                }
+                sh "docker rm -f selenium-hub"
+                sh "docker rm -f chrome"
+                sh "docker rm -f firefox"
             }
         }
     }
 }
 
 
-def startProcess () {
-    sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
-    sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
-    sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
-}
 
 def sendNotification(String environment, String status) {
     if (status == "success") {
@@ -109,12 +104,6 @@ def deployAndSendNotification(String environment) {
 def test(String environment) {
     echo "Running tests on ${environment}.."
     sh "docker pull anitamio/mvn_tests:latest"
-}
-
-def stopProcess() {
-    sh "docker rm -f selenium-hub"
-    sh "docker rm -f chrome"
-    sh "docker rm -f firefox"
 }
 
 def runTestsAndGetReport(String testingEnv) {
