@@ -33,7 +33,7 @@ pipeline {
                 stage('test_chrome_stage') {
                     steps {
                         script {
-                            runTestsAndGetReport("test_chrome", "chrome")
+                            runTestsAndGetReport("test_chrome")
                         }
                     }
                 }
@@ -41,7 +41,7 @@ pipeline {
                 stage('test_firefox_stage') {
                     steps {
                         script {
-                            runTestsAndGetReport("test-firefox", "firefox")
+                            runTestsAndGetReport("test-firefox")
                         }
                     }
                 }
@@ -53,14 +53,14 @@ pipeline {
                 stage('test_prod_chrome') {
                     steps {
                         script {
-                            runTestsAndGetReport("prod_chrome", "chrome")
+                            runTestsAndGetReport("prod_chrome")
                         }
                     }
                 }
                 stage('test_prod_firefox') {
                     steps {
                         script {
-                            runTestsAndGetReport("prod_firefox", "firefox")
+                            runTestsAndGetReport("prod_firefox")
                         }
                     }
                 }
@@ -106,11 +106,11 @@ def test(String environment) {
     sh "docker pull anitamio/mvn_tests:latest"
 }
 
-def runTestsAndGetReport(String testingEnv, String browser) {
+def runTestsAndGetReport(String testingEnv) {
     test(testingEnv)
     try {
         sh "docker run -d -t --network=test-automation-setup --name mvn-tests-${testingEnv} anitamio/mvn_tests:latest"
-        sh "docker exec mvn-tests-${testingEnv} mvn clean test -Dbrowser=${browser} -DgridURL=selenium-hub:4444"
+        sh "docker exec mvn-tests-${testingEnv} mvn clean test -Dbrowser=chrome -DgridURL=selenium-hub:4444"
         sh "docker exec mvn-tests-${testingEnv} mvn io.qameta.allure:allure-maven:report"
         sh "docker exec mvn-tests-${testingEnv} rm -rf test-results/*"
         sh "docker exec mvn-tests-${testingEnv} cp -R target/site/allure-maven-plugin test-results"
