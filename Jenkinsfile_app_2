@@ -73,14 +73,14 @@ pipeline {
 
         stage('Test_staging') {
             steps {
-
+                echo "echo"
             }
 
         }
 
         stage('Test_production') {
             steps {
-
+                echo "echo"
             }
 
         }
