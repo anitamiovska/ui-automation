@@ -20,11 +20,11 @@ pipeline {
             }
             post {
                 success {
-                    sh "bash send_notification.sh ${environment} 0"
+                    sh "sh ./send_notification.sh '${environment}' 0"
                 }
                 failure {
                     script{
-                        sh "bash send_notification.sh ${environment} 1"
+                        sh "sh ./send_notification.sh '${environment}' 1"
                         error "Failed, exiting now..."
                     }
                 }
@@ -40,11 +40,11 @@ pipeline {
             }
             post {
                 success {
-                    sh "bash send_notification.sh ${environment} 0"
+                    sh "sh ./send_notification.sh '${environment}' 0"
                 }
                 failure {
                     script{
-                        sh "bash send_notification.sh ${environment} 1"
+                        sh "sh ./send_notification.sh '${environment}' 1"
                         error "Failed, exiting now..."
                     }
                 }
@@ -59,11 +59,11 @@ pipeline {
             }
             post {
                 success {
-                    sh "bash send_notification.sh ${environment} 0"
+                    sh "sh ./send_notification.sh '${environment}' 0"
                 }
                 failure {
                     script{
-                        sh "bash send_notification.sh ${environment} 1"
+                        sh "sh ./send_notification.sh '${environment}' 1"
                         error "Failed, exiting now..."
                     }
                 }
