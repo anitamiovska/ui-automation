@@ -15,9 +15,6 @@ pipeline {
         stage('Build') {
             steps{
                 echo "Building application"
-                //sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
-                //sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
-                //sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
             }
             post {
                 success {
@@ -29,7 +26,26 @@ pipeline {
                         error "Failed, exiting now..."
                     }
                 }
+            }
+        }
 
+        stage('deploy_hub') {
+            steps{
+                echo "Deploying HUB"
+                sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
+                sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
+                sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
+            }
+            post {
+                success {
+                    sh "sh ./send_notification.sh 'HUB deployment success' 0"
+                }
+                failure {
+                    script{
+                        sh "sh ./send_notification.sh 'HUB deployment failure' 1"
+                        error "Failed, exiting now..."
+                    }
+                }
             }
         }
 
@@ -69,36 +85,102 @@ pipeline {
                     }
                 }
             }
-
         }
 
         stage('Test_staging') {
-            steps {
-                echo "echo"
+            parallel{
+                stage('Test_staging_chrome'){
+                    steps {
+                        test('Test_staging_chrome, chrome')
+                    }
+                    post {
+                        success {
+                            sh "sh ./send_notification.sh 'Test run on staging success' 0"
+                        }
+                        failure {
+                            script{
+                                sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
+                                error "Failed, exiting now..."
+                            }
+                        }
+                    }
+                }
+                stage('Test_staging_firefox'){
+                    steps {
+                        test('Test_staging_firefox, firefox')
+                    }
+                    post {
+                        success {
+                            sh "sh ./send_notification.sh 'Test run on staging success' 0"
+                        }
+                        failure {
+                            script{
+                                sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
+                                error "Failed, exiting now..."
+                            }
+                        }
+                    }
+                }
             }
-
         }
 
         stage('Test_production') {
-            steps {
-                echo "echo"
+            parallel{
+                stage('Test_production_chrome'){
+                    steps {
+                        test('Test_prod_chrome, chrome')
+                    }
+                    post {
+                        success {
+                            sh "sh ./send_notification.sh 'Test run on staging success' 0"
+                        }
+                        failure {
+                            script{
+                                sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
+                                error "Failed, exiting now..."
+                            }
+                        }
+                    }
+                }
+                stage('Test_production_firefox'){
+                    steps {
+                        test('Test_prod_firefox, firefox')
+                    }
+                    post {
+                        success {
+                            sh "sh ./send_notification.sh 'Test run on staging success' 0"
+                        }
+                        failure {
+                            script{
+                                sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
+                                error "Failed, exiting now..."
+                            }
+                        }
+                    }
+                }
             }
-
         }
     }
-    
-
+    post {
+        always {
+            sh "docker rm -f selenium-hub"
+            sh "docker rm -f chrome"
+            sh "docker rm -f firefox"
+        }
+    }
 }
 
 def deploy(String environment){
     echo "Deployment to ${environment} environment"
-
     }
 
 
-
-def test(String environment){
+def test(String environment, String browser){
     echo "Tests running on ${environment} environment"
     sh "docker pull anitamio/mvn_tests:latest"
+    sh "docker exec mvn-tests-${environment} mvn clean test -Dbrowser=${browser} -DgridURL=selenium-hub:4444"
+    sh "docker exec mvn-tests-${environment} mvn io.qameta.allure:allure-maven:report"
+    sh "docker exec mvn-tests-${environment} rm -rf test-results/*"
+    sh "docker exec mvn-tests-${environment} cp -R target/site/allure-maven-plugin test-results"
 }
 
