@@ -93,7 +93,9 @@ pipeline {
             parallel{
                 stage('Test_staging_chrome'){
                     steps {
-                        test('Test_staging_chrome, chrome')
+                        script{
+                            test('Test_staging_chrome, chrome')
+                        }
                     }
                     post {
                         success {
@@ -109,7 +111,9 @@ pipeline {
                 }
                 stage('Test_staging_firefox'){
                     steps {
-                        test('Test_staging_firefox, firefox')
+                        script {
+                            test('Test_staging_firefox, firefox')
+                        }
                     }
                     post {
                         success {
@@ -130,7 +134,9 @@ pipeline {
             parallel{
                 stage('Test_production_chrome'){
                     steps {
-                        test('Test_prod_chrome, chrome')
+                        script{
+                            test('Test_prod_chrome, chrome')
+                        }
                     }
                     post {
                         success {
@@ -146,7 +152,9 @@ pipeline {
                 }
                 stage('Test_production_firefox'){
                     steps {
-                        test('Test_prod_firefox, firefox')
+                        script{
+                            test('Test_prod_firefox, firefox')
+                        }
                     }
                     post {
                         success {
