@@ -9,7 +9,8 @@ pipeline {
         string(name: 'environment', defaultValue: 'staging', description: 'Running tests')
     }
     //Used this as a reference to create stop the execution on failure https://itnext.io/jenkins-tutorial-part-4-post-actions-e5d0ef1e3c39
-
+    //https://stackoverflow.com/questions/51637782/how-to-exit-from-the-jenkins-pipeline-if-a-stage-sets-build-fail-unstable-status
+    
     stages {    
 
         stage('Build') {
@@ -88,6 +89,7 @@ pipeline {
         }
 
         stage('Test_staging') {
+            //parallel from https://www.jenkins.io/doc/book/pipeline/syntax/#parallel
             parallel{
                 stage('Test_staging_chrome'){
                     steps {
