@@ -32,7 +32,7 @@ pipeline {
         }
 
         stage('Deploy_staging') {
-            steps{
+            steps {
                 script{
                     deploy('staging')
                 }
@@ -51,7 +51,7 @@ pipeline {
     }
 
         stage('Deploy_production') {
-           steps{
+           steps {
                 script{
                     deploy('production')
                 }
@@ -71,10 +71,16 @@ pipeline {
     }
 
         stage('Test_staging') {
+            steps {
+
+            }
 
         }
 
         stage('Test_production') {
+            steps {
+                
+            }
 
         }
     }
