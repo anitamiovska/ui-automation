@@ -18,18 +18,18 @@ pipeline {
                 //sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
                 //sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
             }
-        post {
-            success {
-                sh "bash send_notification.sh ${environment} 0"
-            }
-            failure {
-                script{
-                    sh "bash send_notification.sh ${environment} 1"
-                    error "Failed, exiting now..."
+            post {
+                success {
+                    sh "bash send_notification.sh ${environment} 0"
                 }
-            }
+                failure {
+                    script{
+                        sh "bash send_notification.sh ${environment} 1"
+                        error "Failed, exiting now..."
+                    }
+                }
 
-        }
+            }
 
         stage('Deploy_staging') {
             steps {
@@ -37,18 +37,18 @@ pipeline {
                     deploy('staging')
                 }
             }
-        post {
-            success {
-                sh "bash send_notification.sh ${environment} 0"
-            }
-            failure {
-                script{
-                    sh "bash send_notification.sh ${environment} 1"
-                    error "Failed, exiting now..."
+            post {
+                success {
+                    sh "bash send_notification.sh ${environment} 0"
+                }
+                failure {
+                    script{
+                        sh "bash send_notification.sh ${environment} 1"
+                        error "Failed, exiting now..."
+                    }
                 }
             }
         }
-    }
 
         stage('Deploy_production') {
            steps {
@@ -56,19 +56,19 @@ pipeline {
                     deploy('production')
                 }
             }
-        post {
-            success {
-                sh "bash send_notification.sh ${environment} 0"
-            }
-            failure {
-                script{
-                    sh "bash send_notification.sh ${environment} 1"
-                    error "Failed, exiting now..."
+            post {
+                success {
+                    sh "bash send_notification.sh ${environment} 0"
+                }
+                failure {
+                    script{
+                        sh "bash send_notification.sh ${environment} 1"
+                        error "Failed, exiting now..."
+                    }
                 }
             }
-        }
 
-    }
+        }
 
         stage('Test_staging') {
             steps {
@@ -79,7 +79,7 @@ pipeline {
 
         stage('Test_production') {
             steps {
-                
+
             }
 
         }
