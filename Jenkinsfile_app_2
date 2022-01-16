@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+
+    triggers {
+        pollSCM('*/1 * * * *')
+    }
+
+    parameters {
+        string(name: 'environment', defaultValue: 'staging', description: 'Running tests')
+
+    stages {    
+        
+        stage('Build') {
+            steps{
+                echo "Building application"
+                //sh "docker run -d -p 4444:4444 --net test-automation-setup --rm --name selenium-hub selenium/hub:4.1.0-20211209"
+                //sh "docker run -d --rm --name chrome --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-chrome:3.141.59-20210929"
+                //sh "docker run -d --rm --name firefox --net test-automation-setup -v /dev/shm:/dev/shm -e HUB_HOST=selenium-hub -e HUB_PORT=4444 selenium/node-firefox:3.141.59-20210929"
+            }
+        post {
+            success {
+                sh "bash send_notification.sh ${environment} 0"
+            }
+            failure {
+                script{
+                    sh "bash send_notification.sh ${environment} 1"
+                    error "Failed, exiting now..."
+                }
+            }
+
+        }
+
+        stage('Deploy_staging') {
+            steps{
+                script{
+                    deploy('staging')
+                }
+            }
+        post {
+            success {
+                sh "bash send_notification.sh ${environment} 0"
+            }
+            failure {
+                script{
+                    sh "bash send_notification.sh ${environment} 1"
+                    error "Failed, exiting now..."
+                }
+            }
+        }
+    }
+
+        stage('Deploy_production') {
+           steps{
+                script{
+                    deploy('production')
+                }
+            }
+        post {
+            success {
+                sh "bash send_notification.sh ${environment} 0"
+            }
+            failure {
+                script{
+                    sh "bash send_notification.sh ${environment} 1"
+                    error "Failed, exiting now..."
+                }
+            }
+        }
+
+    }
+
+        stage('Test_staging') {
+
+        }
+
+        stage('Test_production') {
+
+        }
+    }
+
+
+}
+
+def deploy(String environment){
+    echo "Deployment to ${environment} environment"
+
+    }
+
+
+
+def test(String environment){
+    echo "Tests running on ${environment} environment"
+    sh "docker pull anitamio/mvn_tests:latest"
+}
+
