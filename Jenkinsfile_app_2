@@ -178,8 +178,9 @@ def deploy(String environment){
 
 
 def test(String environment, String browser){
-    echo "Tests running on ${environment} environment"
-    sh "docker pull anitamio/mvn_tests:latest"
+    echo "Tests running on ${environment} environment with ${browser}"
+    //sh "docker run -d -t --network=test-automation-setup --name mvn-tests-${environment} anitamio/mvn_tests:latest"
+    //sh "docker pull anitamio/mvn_tests:latest"
     //sh "docker exec mvn-tests-${environment} mvn clean test -Dbrowser=${browser} -DgridURL=selenium-hub:4444"
     //sh "docker exec mvn-tests-${environment} mvn io.qameta.allure:allure-maven:report"
     //sh "docker exec mvn-tests-${environment} rm -rf test-results/*"
