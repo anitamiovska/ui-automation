@@ -8,6 +8,7 @@ pipeline {
     parameters {
         string(name: 'environment', defaultValue: 'staging', description: 'Running tests')
     }
+    //Used this as a reference to create stop the execution on failure https://itnext.io/jenkins-tutorial-part-4-post-actions-e5d0ef1e3c39
 
     stages {    
 
@@ -20,11 +21,11 @@ pipeline {
             }
             post {
                 success {
-                    sh "sh ./send_notification.sh '${environment}' 0"
+                    sh "sh ./send_notification.sh 'Build success' 0"
                 }
                 failure {
                     script{
-                        sh "sh ./send_notification.sh '${environment}' 1"
+                        sh "sh ./send_notification.sh 'Build failure' 1"
                         error "Failed, exiting now..."
                     }
                 }
@@ -40,11 +41,11 @@ pipeline {
             }
             post {
                 success {
-                    sh "sh ./send_notification.sh '${environment}' 0"
+                    sh "sh ./send_notification.sh 'Staging deployed' 0"
                 }
                 failure {
                     script{
-                        sh "sh ./send_notification.sh '${environment}' 1"
+                        sh "sh ./send_notification.sh 'Failed to deploy stage' 1"
                         error "Failed, exiting now..."
                     }
                 }
@@ -59,11 +60,11 @@ pipeline {
             }
             post {
                 success {
-                    sh "sh ./send_notification.sh '${environment}' 0"
+                    sh "sh ./send_notification.sh 'Production deployed' 0"
                 }
                 failure {
                     script{
-                        sh "sh ./send_notification.sh '${environment}' 1"
+                        sh "sh ./send_notification.sh 'Failed to deploy stage' 1"
                         error "Failed, exiting now..."
                     }
                 }
