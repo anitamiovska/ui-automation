@@ -24,7 +24,7 @@ pipeline {
                 failure {
                     script{
                         sh "sh ./send_notification.sh 'Build failure' 1"
-                        error "Failed, exiting now..."
+                        //error "Failed, exiting now..."
                     }
                 }
             }
@@ -44,7 +44,7 @@ pipeline {
                 failure {
                     script{
                         sh "sh ./send_notification.sh 'HUB deployment failure' 1"
-                        error "Failed, exiting now..."
+                        //error "Failed, exiting now..."
                     }
                 }
             }
@@ -63,7 +63,7 @@ pipeline {
                 failure {
                     script{
                         sh "sh ./send_notification.sh 'Failed to deploy stage' 1"
-                        error "Failed, exiting now..."
+                        //error "Failed, exiting now..."
                     }
                 }
             }
@@ -82,7 +82,7 @@ pipeline {
                 failure {
                     script{
                         sh "sh ./send_notification.sh 'Failed to deploy stage' 1"
-                        error "Failed, exiting now..."
+                        //error "Failed, exiting now..."
                     }
                 }
             }
@@ -102,7 +102,7 @@ pipeline {
                         failure {
                             script{
                                 sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
-                                error "Failed, exiting now..."
+                               // error "Failed, exiting now..."
                             }
                         }
                     }
@@ -118,7 +118,7 @@ pipeline {
                         failure {
                             script{
                                 sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
-                                error "Failed, exiting now..."
+                                //error "Failed, exiting now..."
                             }
                         }
                     }
@@ -139,7 +139,7 @@ pipeline {
                         failure {
                             script{
                                 sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
-                                error "Failed, exiting now..."
+                                //error "Failed, exiting now..."
                             }
                         }
                     }
@@ -155,7 +155,7 @@ pipeline {
                         failure {
                             script{
                                 sh "sh ./send_notification.sh 'Failed to run tests on staging' 1"
-                                error "Failed, exiting now..."
+                                //error "Failed, exiting now..."
                             }
                         }
                     }
