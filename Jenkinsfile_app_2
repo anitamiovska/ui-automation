@@ -90,11 +90,11 @@ pipeline {
 
         stage('Test_staging') {
             //parallel from https://www.jenkins.io/doc/book/pipeline/syntax/#parallel
-            parallel{
+            parallel {
                 stage('Test_staging_chrome'){
                     steps {
                         script{
-                            test('Test_staging_chrome, chrome')
+                            test('Test_staging_chrome', 'chrome')
                         }
                     }
                     post {
@@ -112,7 +112,7 @@ pipeline {
                 stage('Test_staging_firefox'){
                     steps {
                         script {
-                            test('Test_staging_firefox, firefox')
+                            test('Test_staging_firefox', 'firefox')
                         }
                     }
                     post {
@@ -135,7 +135,7 @@ pipeline {
                 stage('Test_production_chrome'){
                     steps {
                         script{
-                            test('Test_prod_chrome, chrome')
+                            test('Test_prod_chrome', 'chrome')
                         }
                     }
                     post {
@@ -153,7 +153,7 @@ pipeline {
                 stage('Test_production_firefox'){
                     steps {
                         script{
-                            test('Test_prod_firefox, firefox')
+                            test('Test_prod_firefox', 'firefox')
                         }
                     }
                     post {
